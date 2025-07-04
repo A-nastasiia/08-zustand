@@ -1,20 +1,20 @@
-import Link from 'next/link';
-import css from './page.module.css';
+import Link from "next/link";
+import css from "./not-found.module.css";
+import { Metadata } from "next";
 
-export const metadata = {
-  title: 'Page not found – NoteHub',
-  description: 'Sorry, page not found.',
+export const metadata: Metadata = {
+  title: "404",
+  description: "Page not found",
   openGraph: {
-    title: '404 – Page not found',
-    description: 'Sorry, the page you are looking for does not exist.',
-    // url: 'https://your-vercel-url.vercel.app/not-found',
-    url: ``,
+    title: "404",
+    description: "Page not found",
+    url: `https://notehub-public.goit.study/api`,
     images: [
       {
-        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
         width: 1200,
         height: 630,
-        alt: 'NoteHub 404',
+        alt: "NoteHub",
       },
     ],
   },
@@ -22,17 +22,13 @@ export const metadata = {
 
 const NotFound = () => {
   return (
-    <section>
-      <div className={css.container}>
-        <h1 className={css.title}>404 - Page not found</h1>
-        <p className={css.description}>
-          Sorry, the page you are looking for does not exist.
-        </p>
-        <Link href="/" className={css.buttonLink}>
-          Go back home
-        </Link>
-      </div>
-    </section>
+    <div>
+      <h1 className={css.title}>404 - Page not found</h1>
+      <p className={css.description}>
+        Sorry, the page you are looking for does not exist.
+      </p>
+      <Link href="/">Go back home</Link>
+    </div>
   );
 };
 

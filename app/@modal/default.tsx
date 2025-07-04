@@ -1,3 +1,7 @@
-const Default = () => null;
+// app/@modal/default.tsx
+
+const Default = () => {
+  return null;
+};
 
 export default Default;

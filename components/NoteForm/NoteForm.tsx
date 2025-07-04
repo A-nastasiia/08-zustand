@@ -1,163 +1,133 @@
+"use client";
 
-'use client';
-import { useNoteStore } from '@/lib/store/noteStore';
-import { useState, useEffect } from 'react';
-import css from './NoteForm.module.css';
-import { useRouter } from 'next/navigation';
+import { useRef } from "react";
+import { Tag } from "../../types/note";
+import css from "./NoteForm.module.css";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createNote } from "../../lib/api";
+import { toast } from "react-hot-toast";
+import { useNoteStore } from "../../lib/store/noteStore";
+import { useRouter } from "next/navigation";
 
 export default function NoteForm() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const queryClient = useQueryClient();
   const router = useRouter();
+
   const { draft, setDraft, clearDraft } = useNoteStore();
-  const [form, setForm] = useState(draft);
 
-  useEffect(() => {
-    setForm(draft);
-  }, [draft]);
+  const { mutate, status } = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      toast.success("Note created!");
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      clearDraft(); // очищаємо чернетку
+      formRef.current?.reset();
+      router.push("/notes/filter/all");
+    },
+    onError: () => {
+      toast.error("Failed to create note");
+    },
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  // Прив'язка чернетки до полів форми
+
+  async function handleSubmit(formData: FormData) {
+    const title = formData.get("title")?.toString().trim() || "";
+    const content = formData.get("content")?.toString().trim() || "";
+    const tag = formData.get("tag")?.toString() as Tag;
+
+    if (!title || title.length < 3 || title.length > 50) {
+      toast.error("Title must be 3-50 characters long");
+      return;
+    }
+
+    if (content.length > 500) {
+      toast.error("Content must contain no more than 500 characters");
+      return;
+    }
+
+    if (!Object.values(Tag).includes(tag)) {
+      toast.error("Invalid tag");
+      return;
+    }
+
+    mutate({ title, content, tag });
+  }
+
+  function handleChange(
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) {
     const { name, value } = e.target;
-    const updated = { ...form, [name]: value };
-    setForm(updated);
-    setDraft(updated);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await fetch('/api/notes', {
-      method: 'POST',
-      body: JSON.stringify(form),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    clearDraft();
-    router.back();
-  };
+    setDraft({ [name]: value });
+  }
 
   return (
-    <form onSubmit={handleSubmit} className={css.form}>
-      <input
-        name="title"
-        value={form.title}
-        onChange={handleChange}
-        placeholder="Title"
-        required
-        className={css.input}
-      />
-      <textarea
-        name="content"
-        value={form.content}
-        onChange={handleChange}
-        placeholder="Content"
-        required
-        className={css.textarea}
-      />
-      <select name="tag" value={form.tag} onChange={handleChange} className={css.select}>
-        <option value="Todo">Todo</option>
-        <option value="Work">Work</option>
-        <option value="Personal">Personal</option>
-      </select>
-      <div className={css.buttons}>
-        <button type="submit" className={css.button}>Save</button>
-        <button type="button" className={css.button} onClick={() => router.back()}>
+    <form ref={formRef} className={css.form} action={handleSubmit}>
+      <div className={css.formGroup}>
+        <label htmlFor="title">Title</label>
+        <input
+          id="title"
+          name="title"
+          className={css.input}
+          required
+          minLength={3}
+          maxLength={50}
+          onChange={handleChange}
+          defaultValue={draft.title}
+        />
+      </div>
+
+      <div className={css.formGroup}>
+        <label htmlFor="content">Content</label>
+        <textarea
+          id="content"
+          name="content"
+          className={css.textarea}
+          rows={8}
+          maxLength={500}
+          onChange={handleChange}
+          defaultValue={draft.content}
+        />
+      </div>
+
+      <div className={css.formGroup}>
+        <label htmlFor="tag">Tag</label>
+        <select
+          id="tag"
+          name="tag"
+          className={css.select}
+          required
+          onChange={handleChange}
+          defaultValue={draft.tag}
+        >
+          {Object.values(Tag).map((tag) => (
+            <option key={tag} value={tag}>
+              {tag}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={css.actions}>
+        <button
+          type="button"
+          className={css.cancelButton}
+          onClick={() => router.back()} // Повернення назад без очищення
+          disabled={status === "pending"}
+        >
           Cancel
+        </button>
+        <button
+          type="submit"
+          className={css.submitButton}
+          disabled={status === "pending"}
+        >
+          {status === "pending" ? "Creating..." : "Create note"}
         </button>
       </div>
     </form>
   );
 }
-
-
-// import { Field, Form, Formik, ErrorMessage } from "formik";
-// import css from "./NoteForm.module.css";
-// import type { Tags } from "../../types/note";
-// import { createNote } from "../../lib/api";
-// import * as Yup from "yup";
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
-// import Loader from "../Loader/Loader";
-// import ErrorText from "../ErrorMessage/ErrorMessage";
-
-// interface NoteFormProps {
-//     onClose: () => void;
-// };
-// interface FormValues {
-//     title: string;
-//     content: string;
-//     tag: Tags;
-// };
-
-// const NoteSchema = Yup.object().shape({
-//     title: Yup.string().min(3, "Min. of 3 symbols").max(50, "Max. characters 50").required("Title is required"),
-//     content: Yup.string().max(500, "Max. characters 500"),
-//     tag: Yup.string().oneOf(['Work', 'Personal', 'Meeting', 'Shopping', 'Todo'], "Invalid tag value").required("Select a note tag")
-// }
-// );
-
-// const initialValues: FormValues = { title: "", content: "", tag: "Todo" };
-
-
-// export default function NoteForm({ onClose }: NoteFormProps) {
-//     const queryClient = useQueryClient();
-//     const { mutate, isPending, isError } = useMutation({
-//         mutationFn: (noteData: FormValues) => createNote(noteData),
-//         onSuccess: () => {
-//             queryClient.invalidateQueries({ queryKey: ["notes"] });
-//             onClose();
-//         }
-//     });
-//     const handleCreateTask = (values: FormValues) => {
-//         mutate(values);
-//     };
-//     return (
-//         <>
-//             <Formik initialValues={initialValues} onSubmit={handleCreateTask} validationSchema={NoteSchema} >
-//                 <Form className={css.form}>
-//                     {isPending ? <Loader /> : <>
-//                         <div className={css.formGroup}>
-//                             <label htmlFor="title">Title</label>
-//                             <Field id="title" type="text" name="title" className={css.input} />
-//                             <ErrorMessage component="span" name="title" className={css.error} />
-//                         </div>
-
-//                         <div className={css.formGroup}>
-//                             <label htmlFor="content">Content</label>
-//                             <Field
-//                                 as="textarea"
-//                                 id="content"
-//                                 name="content"
-//                                 rows={4}
-//                                 className={css.textarea}
-//                             />
-//                             <ErrorMessage component="span" name="content" className={css.error} />
-//                         </div>
-
-//                         <div className={css.formGroup}>
-//                             <label htmlFor="tag">Tag</label>
-//                             <Field as="select" id="tag" name="tag" className={css.select}>
-//                                 <option value="Todo">Todo</option>
-//                                 <option value="Work">Work</option>
-//                                 <option value="Personal">Personal</option>
-//                                 <option value="Meeting">Meeting</option>
-//                                 <option value="Shopping">Shopping</option>
-//                             </Field>
-//                             <ErrorMessage component="span" name="tag" className={css.error} />
-//                         </div>
-
-//                         <div className={css.actions}>
-//                             <button type="button" className={css.cancelButton} onClick={onClose}>
-//                                 Cancel
-//                             </button>
-//                             <button
-//                                 type="submit"
-//                                 className={css.submitButton}
-//                                 disabled={isPending ? true : false}
-//                             >
-//                                 Create note
-//                             </button>
-//                         </div>
-//                         {isError && <ErrorText text="Please try again later..." />}
-//                     </>
-//                     }
-//                 </Form>
-//             </Formik >
-//         </>
-//     );
-// };

@@ -1,25 +1,24 @@
-export type Tags = 'Work' | 'Personal' | 'Meeting' | 'Shopping' | 'Todo';
-
 export interface Note {
   id: number;
   title: string;
   content: string;
+  tag: Tag;
+
   createdAt: string;
   updatedAt: string;
-  tag: Tags;
 }
 
-export interface CreateNote {
+export interface CreateNoteData {
   title: string;
   content: string;
-  tag: Tags;
+  tag: Tag;
+}
+export enum Tag {
+  Todo = "Todo",
+  Work = "Work",
+  Personal = "Personal",
+  Meeting = "Meeting",
+  Shopping = "Shopping",
 }
 
-export interface NotesHttpResponse {
-  notes: Note[];
-  totalPages: number | undefined;
-}
-
-export interface TagsProps {
-  tags: Tags[];
-}
+export type TagWithAll = Tag | "All";

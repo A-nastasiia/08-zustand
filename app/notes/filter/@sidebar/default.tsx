@@ -1,19 +1,16 @@
-import { TagsProps } from '@/types/note';
-import css from './SidebarNotes.module.css';
-import Link from 'next/link';
+// app/notes/filter/@sidebar/default.tsx
 
-const SidebarNotes = ({
-  tags = ['Work', 'Personal', 'Meeting', 'Shopping', 'Todo'],
-}: TagsProps) => {
+import Link from "next/link";
+import { Tag } from "../../../../types/note";
+import css from "./SidebarNotes.module.css";
+
+const tags = ["All", ...Object.values(Tag)];
+
+const SidebarNotes = () => {
   return (
     <ul className={css.menuList}>
-      <li className={css.menuItem}>
-        <Link href={`/notes/filter/all`} className={css.menuLink}>
-          All Notes
-        </Link>
-      </li>
-      {tags.map(tag => (
-        <li className={css.menuItem} key={tag}>
+      {tags.map((tag) => (
+        <li key={tag} className={css.menuItem}>
           <Link href={`/notes/filter/${tag}`} className={css.menuLink}>
             {tag}
           </Link>

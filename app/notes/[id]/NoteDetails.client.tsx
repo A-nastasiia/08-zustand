@@ -1,51 +1,40 @@
-'use client';
+// app/notes/[id]/NoteDetails.client.tsx
 
-import { useParams } from 'next/navigation';
-import css from './NoteDetails.module.css';
-import { useQuery } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
-import Loader from '@/components/Loader/Loader';
+"use client";
 
-const NoteDetailsClient = () => {
-  const { id } = useParams<{ id: string }>();
-  const parseId = Number(id);
+import { useQuery } from "@tanstack/react-query";
+import { fetchNoteById } from "../../../lib/api";
+import css from "./NoteDetails.module.css";
 
+interface NoteDetailsClientProps {
+  id: number;
+}
+
+const NoteDetailsClient = ({ id }: NoteDetailsClientProps) => {
   const {
     data: note,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['note', parseId],
-    queryFn: () => fetchNoteById(parseId),
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
     refetchOnMount: false,
   });
-  if (isLoading)
-    return (
-      <div className={css.backdrop}>
-        <Loader />
-      </div>
-    );
-  if (error) return <p>Something went wrong.</p>;
-  if (!note) return <p>Sorry, note not found.</p>;
 
-  const formattedDate = note.updatedAt
-    ? `Updated at: ${note.updatedAt}`
-    : `Created at: ${note.createdAt}`;
+  if (isLoading) return <p>Loading, please wait...</p>;
+  if (error || !note) return <p>Something went wrong.</p>;
+
   return (
-    <>
-      {note && (
-        <div className={css.container}>
-          <div className={css.item}>
-            <div className={css.header}>
-              <h2>{note.title}</h2>
-              <button className={css.editBtn}>Edit note</button>
-            </div>
-            <p className={css.content}>{note.content}</p>
-            <p className={css.date}>{formattedDate}</p>
-          </div>
+    <div className={css.container}>
+      <div className={css.item}>
+        <div className={css.header}>
+          <h2>{note.title}</h2>
+          <button className={css.editBtn}>Edit note</button>
         </div>
-      )}
-    </>
+        <p className={css.content}>{note.content}</p>
+        <p className={css.date}>{new Date(note.createdAt).toLocaleString()}</p>
+      </div>
+    </div>
   );
 };
 

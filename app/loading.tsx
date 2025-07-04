@@ -1,18 +1,7 @@
-import type { CSSProperties } from 'react';
-import { ScaleLoader } from 'react-spinners';
-import css from './page.module.css';
+// app/notes/loading.tsx
 
-const override: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'center',
+const Loading = () => {
+  return <p>Loading, please wait...</p>;
 };
 
-const Loader = () => {
-  return (
-    <div className={css.backdrop}>
-      <ScaleLoader color="#dc3545" cssOverride={override} />
-    </div>
-  );
-};
-
-export default Loader;
+export default Loading;

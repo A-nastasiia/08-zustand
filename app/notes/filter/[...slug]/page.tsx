@@ -1,86 +1,91 @@
-import NotesClient from './Notes.client';
 import {
-  dehydrate,
-  HydrationBoundary,
   QueryClient,
-} from '@tanstack/react-query';
-import { fetchNotes } from '@/lib/api';
-import { NotesHttpResponse } from '@/types/note';
-import { Metadata } from 'next';
+  HydrationBoundary,
+  dehydrate,
+} from "@tanstack/react-query";
+import { fetchNotes } from "../../../../lib/api";
+import Notes from "./Notes.client";
+import { Tag, type TagWithAll } from "@/types/note";
+import type { Metadata } from "next";
 
-type NotesProps = {
-  params: Promise<{ slug: string[] }>;
-};
+interface NotesPageProps {
+  params: Promise<{
+    slug?: string[];
+  }>;
+}
 
 export async function generateMetadata({
   params,
-}: {
-  params: { slug: string[] };
-}): Promise<Metadata> {
-  const tag = params.slug[0] === 'all' ? 'All notes' : params.slug[0];
+}: NotesPageProps): Promise<Metadata> {
+  const awaitedParams = await params;
+  const rawTag = awaitedParams.slug?.[0] ?? "All";
+  const validTags: TagWithAll[] = ["All", ...Object.values(Tag)];
+  const tag: TagWithAll = validTags.includes(rawTag as TagWithAll)
+    ? (rawTag as TagWithAll)
+    : "All";
 
-  const title = `${tag} – NoteHub`;
-  const description = `Browse notes filtered by tag: ${tag}.`;
+  const pageTitle = tag === "All" ? "Notehub | All notes" : `Notehub | ${tag}`;
+  const pageDescription =
+    tag === "All"
+      ? "View all notes created in the Notehub app."
+      : `View notes tagged with "${tag}" in the Notehub app`;
 
   return {
-    title,
-    description,
+    title: pageTitle,
+    description: pageDescription,
     openGraph: {
-      title,
-      description,
-      // url: `https://your-vercel-url.vercel.app/notes/filter/${params.slug.join('/')}`,
-      url: ``,
+      title: pageTitle,
+      description: pageDescription,
+      url: `https://notehub-public.goit.study/api`,
       images: [
         {
-          url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
           width: 1200,
           height: 630,
-          alt: 'NoteHub Filter',
+          alt: "NoteHub",
         },
       ],
     },
   };
 }
 
-const Notes = async ({ params }: NotesProps) => {
-  const queryClient = new QueryClient();
-  const { slug } = await params;
-  const initialQuery: string = '';
-  const initialPage: number = 1;
-  const initialPerPage: number = 12;
-  const tag = slug[0] === 'all' ? '' : slug[0];
+export default async function NotesPage({ params }: NotesPageProps) {
+  const awaitedParams = await params;
 
-  await queryClient.prefetchQuery({
-    queryKey: ['notes', initialQuery, initialPage, initialPerPage, tag],
-    queryFn: () =>
-      fetchNotes({
-        page: initialPage,
-        perPage: initialPerPage,
-        searchQuery: initialQuery,
-        tag,
-      }),
+  const queryClient = new QueryClient();
+
+  const initialPage = 1;
+  const initialSearch = "";
+  const validTags: TagWithAll[] = ["All", ...Object.values(Tag)];
+
+  const rawTag = awaitedParams.slug?.[0] ?? "All";
+  const tag: TagWithAll = validTags.includes(rawTag as TagWithAll)
+    ? (rawTag as TagWithAll)
+    : "All";
+  const tagParam = tag === "All" ? undefined : tag;
+
+  const initialData = await fetchNotes({
+    page: initialPage,
+    search: initialSearch,
+    tag: tagParam,
   });
 
-  const initialData = queryClient.getQueryData([
-    'notes',
-    initialQuery,
-    initialPage,
-    initialPerPage,
-    tag,
-  ]) as NotesHttpResponse;
+  await queryClient.prefetchQuery({
+    queryKey: [
+      "notes",
+      { page: initialPage, search: initialSearch, tag: tagParam },
+    ],
+    queryFn: () => Promise.resolve(initialData),
+  });
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NotesClient
-        query={initialQuery}
-        page={initialPage}
+      <Notes
+        initialPage={initialPage}
+        initialSearch={initialSearch}
         initialData={initialData}
-        perPage={initialPerPage}
         tag={tag}
       />
     </HydrationBoundary>
   );
-};
-
-export default Notes;
-
-export const dynamic = 'force-dynamic';
+}
