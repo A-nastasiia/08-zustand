@@ -4,10 +4,32 @@ import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
 import React from 'react';
+import { Roboto } from 'next/font/google';
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'NoteHub',
-  description: 'Created by A-nastasiia,
+  description: 'NoteHub – простий застосунок для створення нотаток.',
+ openGraph: {
+    title: 'NoteHub',
+    description: 'Зберігайте та редагуйте нотатки в зручному інтерфейсі.',
+    // url: 'https://your-vercel-url.vercel.app',
+    url: ``,
+    images: [
+      {
+        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'NoteHub Preview',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -18,7 +40,7 @@ export default function RootLayout({
   modal: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={roboto.variable}>
       <body>
         <TanStackProvider>
           <Header />
