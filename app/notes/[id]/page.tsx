@@ -51,7 +51,7 @@ export async function generateMetadata({
   }
 }
 
-const NoteDetails = async ({ params }: NoteDetailsProps) => {
+const NoteDetails = ({ params }: NoteDetailsProps) => {
     const { id } = params;
     const queryClient = new QueryClient();
     const parseId = Number(id);
