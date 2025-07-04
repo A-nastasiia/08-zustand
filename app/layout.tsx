@@ -15,10 +15,10 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: 'NoteHub',
-  description: 'NoteHub – простий застосунок для створення нотаток.',
+  description: 'NoteHub is a simple tool for creating notes.',
  openGraph: {
     title: 'NoteHub',
-    description: 'Зберігайте та редагуйте нотатки в зручному інтерфейсі.',
+    description: 'Save and edit notes in a convenient interface.',
     // url: 'https://your-vercel-url.vercel.app',
     url: ``,
     images: [
