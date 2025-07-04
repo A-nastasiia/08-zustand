@@ -1,15 +1,10 @@
 
-
 import { fetchNoteById } from "@/lib/api";
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import NoteDetailsClient from "./NoteDetails.client";
 import { Metadata } from 'next';
 
-// Замість ручного типу для params використовуйте типи, надані Next.js
-type NoteDetailsProps = {
-    params: { id: string };
-};
-
+// Використовуємо вбудовані типи Next.js для динамічних параметрів
 export async function generateMetadata({
   params,
 }: {
@@ -53,8 +48,8 @@ export async function generateMetadata({
   }
 }
 
-// Асинхронний компонент для завантаження даних
-const NoteDetails = async ({ params }: NoteDetailsProps) => {
+// Типізація для компонента сторінки
+const NoteDetails = async ({ params }: { params: { id: string } }) => {
   const { id } = params;
   const queryClient = new QueryClient();
   const parseId = Number(id);
