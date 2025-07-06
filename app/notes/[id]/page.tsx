@@ -19,8 +19,7 @@ export async function generateMetadata({ params }: NoteDetailsProps) {
     openGraph: {
       title,
       description: `${tag} note with task ${content}`,
-      // url: `https://08-zustand-pink.vercel.app/notes/${id}`,
-      url: ``,
+      url: `https://08-zustand-nine.vercel.app/notes/${id}`,
       images: [
         {
           url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',

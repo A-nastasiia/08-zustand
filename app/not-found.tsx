@@ -9,8 +9,7 @@ export const metadata: Metadata = {
     title: '404 Not Found',
     description:
       'The page you were looking for could not be found. Please check the URL or return to the homepage.',
-    // url: 'https://08-zustand-pink.vercel.app/404',
-    url: ``,
+    url: `https://08-zustand-nine.vercel.app/404`,
     images: [
       {
         url: 'https://i0.wp.com/learn.onemonth.com/wp-content/uploads/2017/08/1-10.png?w=845&ssl=1',
