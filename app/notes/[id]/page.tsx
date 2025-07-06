@@ -1,43 +1,47 @@
-import { fetchNoteById } from '@/lib/api';
 import {
-  dehydrate,
-  HydrationBoundary,
   QueryClient,
-} from '@tanstack/react-query';
-import NoteDetailsClient from './NoteDetails.client';
+  HydrationBoundary,
+  dehydrate,
+} from "@tanstack/react-query";
+import { fetchNoteById } from "@/lib/api";
+import NoteDetailsClient from "@/app/notes/[id]/NoteDetails.client";
+import { Metadata } from "next";
 
 type NoteDetailsProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata({ params }: NoteDetailsProps) {
+export async function generateMetadata({
+  params,
+}: NoteDetailsProps): Promise<Metadata> {
   const { id } = await params;
-  const { title, content, tag } = await fetchNoteById(Number(id));
+  const parsedId = Number(id);
+  const note = await fetchNoteById(parsedId);
+
   return {
-    title,
-    description: `${tag} note with task ${content}`,
+    title: note.title,
+    description: note.content?.slice(0, 100),
     openGraph: {
-      title,
-      description: `${tag} note with task ${content}`,
+      title: note.title,
+      description: note.content?.slice(0, 100),
       url: `https://08-zustand-nine.vercel.app/notes/${id}`,
       images: [
         {
-          url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
           width: 1200,
           height: 630,
-          alt: `${tag} note with task ${content}`,
+          alt: "Note Details",
         },
       ],
     },
   };
 }
-
-const NoteDetails = async ({ params }: NoteDetailsProps) => {
+async function NoteDetails({ params }: NoteDetailsProps) {
   const { id } = await params;
   const queryClient = new QueryClient();
   const parseId = Number(id);
   queryClient.prefetchQuery({
-    queryKey: ['note', parseId],
+    queryKey: ["note", parseId],
     queryFn: () => fetchNoteById(parseId),
   });
 
@@ -48,6 +52,6 @@ const NoteDetails = async ({ params }: NoteDetailsProps) => {
       </HydrationBoundary>
     </>
   );
-};
+}
 
 export default NoteDetails;

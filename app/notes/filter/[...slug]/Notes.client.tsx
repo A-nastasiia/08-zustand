@@ -1,83 +1,77 @@
-'use client';
 
-import NoteList from '@/components/NoteList/NoteList';
-import Pagination from '@/components/Pagination/Pagination';
-import SearchBox from '@/components/SearchBox/SearchBox';
-import { fetchNotes } from '@/lib/api';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import css from './page.module.css';
-import { useDebounce } from 'use-debounce';
-import { NotesHttpResponse } from '@/types/note';
-import Modal from '@/components/Modal/Modal';
-import NoteForm from '@/components/NoteForm/NoteForm';
+"use client";
 
-type NoteClientProps = {
-  initialData: NotesHttpResponse;
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import css from "./NotesPage.module.css";
+import NoteList from "@/components/NoteList/NoteList";
+import { fetchNotes } from "@/lib/api";
+import { useEffect, useState } from "react";
+import Pagination from "@/components/Pagination/Pagination";
+import SearchBox from "@/components/SearchBox/SearchBox";
+import { useDebounce } from "use-debounce";
+import { Note } from "@/types/note";
+import Link from "next/link";
+
+type NotesClientProps = {
+  query: string;
+  page: number;
+  initialData: {
+    notes: Note[];
+    totalPages: number;
+  };
   tag: string;
 };
 
-const NotesClient = ({ initialData, tag }: NoteClientProps) => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [debouncedQuery] = useDebounce(searchQuery, 300);
+function NotesClient({ query, page, initialData, tag }: NotesClientProps) {
+  const [currentPage, setCurrentPage] = useState(page);
+  const [searchQuery, setSearchQuery] = useState(query);
+  const [debouncedText] = useDebounce(searchQuery, 300);
 
-  const { data, error, isError } = useQuery({
-    queryKey: ['notes', debouncedQuery, currentPage, tag],
-    queryFn: () =>
-      fetchNotes({
-        page: currentPage,
-        searchQuery: debouncedQuery,
-        ...(tag !== '' && { tag }),
-      }),
+  const { data, isSuccess, isError, error } = useQuery({
+    queryKey: ["notes", debouncedText, currentPage, tag],
+    queryFn: () => fetchNotes(debouncedText, currentPage, tag),
     placeholderData: keepPreviousData,
-    initialData,
+    initialData:
+      debouncedText === query && currentPage === page ? initialData : undefined,
+    refetchOnMount: false,
   });
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedQuery]);
 
   if (isError) throw error;
 
-  function handleSearchChange(query: string) {
-    setSearchQuery(query);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedText]);
+
+  function handleSearchChange(value: string) {
+    setSearchQuery(value);
   }
 
   function handlePageChange(page: number) {
     setCurrentPage(page);
   }
-  function openModal() {
-    setIsModalOpen(true);
-  }
-  function closeModal() {
-    setIsModalOpen(false);
-  }
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox value={searchQuery} onSearch={handleSearchChange} />
-        {data?.totalPages !== undefined && data.totalPages > 1 && (
+        <SearchBox inputValue={searchQuery} onChange={handleSearchChange} />
+
+        {isSuccess && data.totalPages > 1 && (
           <Pagination
             totalPages={data.totalPages}
+            setPage={handlePageChange}
             currentPage={currentPage}
-            onChange={handlePageChange}
+            pageRangeDisplayed={5}
+            marginPagesDisplayed={1}
           />
         )}
-        <button className={css.button} onClick={openModal}>
+
+        <Link href="/notes/action/create" className={css.button}>
           Create note +
-        </button>
+        </Link>
       </header>
-      {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
-      {isModalOpen && (
-        <Modal onClose={closeModal}>
-          <NoteForm onClose={closeModal} />
-        </Modal>
-      )}
+      {isSuccess && data.notes.length > 0 && <NoteList notes={data.notes} />}
     </div>
   );
-};
+}
 
 export default NotesClient;

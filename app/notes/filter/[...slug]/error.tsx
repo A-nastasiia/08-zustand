@@ -1,49 +1,28 @@
-'use client';
+"use client";
 
-interface ErrorProps {
+import { useEffect } from "react";
+import styles from "./NotesError.module.css";
+
+type NotesErrorProps = {
   error: Error;
   reset: () => void;
-}
-
-const Error = ({ error, reset }: ErrorProps) => {
-  return (
-    <section>
-      <div style={{ textAlign: 'center' }}>
-        <p
-          style={{
-            fontSize: '16px',
-            textAlign: 'center',
-            maxWidth: '600px',
-            margin: '0 auto',
-            padding: '12px 16px',
-            borderRadius: '6px',
-            border: '1px solid transparent',
-            color: '#d32f2f',
-            backgroundColor: '#fdecea',
-            borderColor: '#f5c2c0',
-          }}
-        >
-          Could not fetch the list of notes. {error.message}
-        </p>
-        <button
-          style={{
-            alignSelf: 'flex-end',
-            padding: '6px 12px',
-            fontSize: '14px',
-            color: '#fff',
-            backgroundColor: '#dc3545',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s ease',
-          }}
-          onClick={reset}
-        >
-          Try again
-        </button>
-      </div>
-    </section>
-  );
 };
 
-export default Error;
+export default function NotesError({ error, reset }: NotesErrorProps) {
+  useEffect(() => {
+    console.error("Error in /notes route:", error);
+  }, [error]);
+
+  return (
+    <div className={styles.errorWrapper}>
+      <h2 className={styles.title}>Oops! Something went wrong</h2>
+      <p className={styles.message}>
+        We couldn`t load your notes right now. Please try again later.
+      </p>
+      <p className={styles.techMessage}>{error.message}</p>
+      <button className={styles.retryButton} onClick={reset}>
+        Try again
+      </button>
+    </div>
+  );
+}

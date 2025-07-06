@@ -1,71 +1,84 @@
-import axios from 'axios';
-import { NotesHttpResponse, type CreateNote, type Note } from '../types/note';
 
-const myKey = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
-if (!myKey) {
-  throw new Error(
-    'Environment variable NEXT_PUBLIC_NOTEHUB_TOKEN is not defined. Please ensure it is set.'
-  );
+import apiClient from "@/lib/apiClient";
+import { Note } from "@/types/note";
+import { NoteTag } from "@/types/note";
+
+export interface NotesResponse {
+  notes: Note[];
+  totalPages: number;
 }
 
-axios.defaults.baseURL = 'https://notehub-public.goit.study/api';
-axios.defaults.headers.common['Authorization'] = `Bearer ${myKey}`;
+export interface CreateNoteValues {
+  title: string;
+  content?: string;
+  tag: NoteTag;
+}
 
-interface fetchNotesProps {
+interface SearchParams {
   page: number;
-  perPage?: number;
-  searchQuery?: string;
+  perPage: number;
+  search?: string;
   tag?: string;
 }
 
-export const fetchNotes = async ({
-  page,
-  perPage = 12,
-  searchQuery,
+const PER_PAGE = 12;
+
+export async function fetchNotes(
+  search: string,
+  page: number,
+  tag?: string
+): Promise<NotesResponse> {
+  const params: SearchParams = { page, perPage: PER_PAGE };
+  if (search) params.search = search;
+  if (tag) params.tag = tag;
+
+  try {
+    const res = await apiClient.get<NotesResponse>("/notes", { params });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching notes:", error);
+    throw new Error("Failed to fetch notes. Please try again later.");
+  }
+}
+
+export async function createNote({
+  title,
+  content,
   tag,
-}: fetchNotesProps): Promise<NotesHttpResponse> => {
+}: CreateNoteValues): Promise<Note> {
   try {
-    const { data } = await axios.get<NotesHttpResponse>('/notes', {
-      params: {
-        page,
-        perPage,
-        ...(tag && { tag }),
-        ...(searchQuery !== '' && { search: searchQuery }),
-      },
+    const res = await apiClient.post<Note>("/notes", {
+      title,
+      content,
+      tag,
     });
-    return data;
-  } catch {
-    throw new Error('Unable to retrieve notes. Please try again later.');
+    return res.data;
+  } catch (error) {
+    console.error("Error creating note:", error);
+    throw new Error("Failed to create note. Please check your input.");
   }
-};
+}
 
-export const createNote = async (noteData: CreateNote): Promise<Note> => {
+export async function deleteNote(id: number): Promise<Note> {
   try {
-    const { data } = await axios.post<Note>('/notes', noteData);
-    return data;
-  } catch {
-    throw new Error(
-      'Unable to create note. Please check your data and try again.'
-    );
+    const res = await apiClient.delete<Note>(`/notes/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error(`Error deleting note with ID ${id}:`, error);
+    throw new Error("Failed to delete note. It may not exist.");
   }
-};
+}
 
-export const deleteNote = async (noteId: number): Promise<Note> => {
-  try {
-    const { data } = await axios.delete<Note>(`/notes/${noteId}`);
-    return data;
-  } catch {
-    throw new Error(
-      'Unable to delete note. It might have already been removed.'
-    );
+export async function fetchNoteById(id: number): Promise<Note> {
+  if (isNaN(id) || id <= 0) {
+    throw new Error(`Invalid ID ${id}`);
   }
-};
 
-export const fetchNoteById = async (id: number): Promise<Note> => {
   try {
-    const { data } = await axios.get<Note>(`/notes/${id}`);
-    return data;
-  } catch {
-    throw new Error('Unable to retrieve note. It might not exist.');
+    const res = await apiClient.get<Note>(`/notes/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error(`Error fetching note with ID ${id}:`, error);
+    throw new Error("Failed to fetch note details.");
   }
-};
+}

@@ -1,12 +1,13 @@
-'use client';
 
-import { useParams } from 'next/navigation';
-import css from './NoteDetails.module.css';
-import { useQuery } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
-import Loader from '@/components/Loader/Loader';
+"use client";
 
-const NoteDetailsClient = () => {
+import { useParams } from "next/navigation";
+import css from "./NoteDetails.module.css";
+import { useQuery } from "@tanstack/react-query";
+import { fetchNoteById } from "@/lib/api";
+import { PropagateLoader } from "react-spinners";
+
+export default function NoteDetailsClient() {
   const { id } = useParams<{ id: string }>();
   const parseId = Number(id);
 
@@ -15,38 +16,46 @@ const NoteDetailsClient = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['note', parseId],
+    queryKey: ["note", parseId],
     queryFn: () => fetchNoteById(parseId),
     refetchOnMount: false,
   });
+
   if (isLoading)
     return (
-      <div className={css.backdrop}>
-        <Loader />
+      <div>
+        <PropagateLoader color="#0d6efd" size={11} speedMultiplier={2} />
       </div>
     );
+
   if (error) return <p>Something went wrong.</p>;
   if (!note) return <p>Sorry, note not found.</p>;
 
-  const formattedDate = note.updatedAt
-    ? `Updated at: ${note.updatedAt}`
-    : `Created at: ${note.createdAt}`;
-  return (
-    <>
-      {note && (
-        <div className={css.container}>
-          <div className={css.item}>
-            <div className={css.header}>
-              <h2>{note.title}</h2>
-              <button className={css.editBtn}>Edit note</button>
-            </div>
-            <p className={css.content}>{note.content}</p>
-            <p className={css.date}>{formattedDate}</p>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
+  const formatDate = (isoDate: string): string => {
+    const date = new Date(isoDate);
+    return date.toLocaleString("uk-UA", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
-export default NoteDetailsClient;
+  return (
+    <div className={css.container}>
+      <div className={css.item}>
+        <div className={css.header}>
+          <h2>{note.title}</h2>
+          <button className={css.editBtn}>Edit note</button>
+        </div>
+        <p className={css.content}>{note.content}</p>
+        <p className={css.date}>
+          {note.updatedAt
+            ? `Updated at: ${formatDate(note.updatedAt)}`
+            : `Created at: ${formatDate(note.createdAt)}`}
+        </p>
+      </div>
+    </div>
+  );
+}

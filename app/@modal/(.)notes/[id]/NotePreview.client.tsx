@@ -1,13 +1,14 @@
-'use client';
 
-import Modal from '@/components/Modal/Modal';
-import css from './NotePreview.module.css';
-import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
-import Loader from '@/components/Loader/Loader';
+"use client";
 
-const NotePreviewClient = () => {
+import Modal from "@/components/Modal/Modal";
+import css from "./NotePreview.module.css";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { fetchNoteById } from "@/lib/api";
+import { PropagateLoader } from "react-spinners";
+
+export default function NotePreviewClient() {
   const router = useRouter();
   const closeModal = () => router.back();
   const { id } = useParams<{ id: string }>();
@@ -18,22 +19,36 @@ const NotePreviewClient = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['note', parseId],
+    queryKey: ["note", parseId],
     queryFn: () => fetchNoteById(parseId),
     refetchOnMount: false,
   });
+
   if (isLoading)
     return (
-      <div className={css.backdrop}>
-        <Loader />
+      <div>
+        <PropagateLoader color="#0d6efd" size={11} speedMultiplier={2} />
       </div>
     );
+
   if (error) return <p>Something went wrong.</p>;
   if (!note) return <p>Sorry, note not found.</p>;
 
+  const formatDate = (isoDate: string): string => {
+    const date = new Date(isoDate);
+    return date.toLocaleString("uk-UA", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const formattedDate = note.updatedAt
-    ? `Updated at: ${note.updatedAt}`
-    : `Created at: ${note.createdAt}`;
+    ? `Updated at: ${formatDate(note.updatedAt)}`
+    : `Created at: ${formatDate(note.createdAt)}`;
+
   return (
     <Modal onClose={closeModal}>
       <div className={css.container}>
@@ -51,6 +66,4 @@ const NotePreviewClient = () => {
       </div>
     </Modal>
   );
-};
-
-export default NotePreviewClient;
+}

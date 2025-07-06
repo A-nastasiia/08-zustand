@@ -1,4 +1,5 @@
 .menuContainer {
+  position: relative;
   display: inline-block;
 }
 

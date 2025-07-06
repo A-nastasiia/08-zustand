@@ -1,33 +1,30 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import Header from '@/components/Header/Header';
-import Footer from '@/components/Footer/Footer';
-import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
-import React from 'react';
-import { Roboto } from 'next/font/google';
+import { Roboto } from "next/font/google";
+import "./globals.css";
+import type { Metadata } from "next";
+import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
+import Header from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
 
 const roboto = Roboto({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-roboto',
-  display: 'swap',
+  subsets: ["latin", "cyrillic"], 
+  weight: ["400", "500", "700"], 
+  variable: "--font-roboto", 
+  display: "swap", 
 });
 
 export const metadata: Metadata = {
-  title: 'NoteHub',
-  description:
-    'NoteHub is a simple tool for creating notes.',
+  title: "NoteHub",
+  description: "Application for creating and viewing notes",
+  icons: {
+    icon: "/notehub.svg",
+  },
   openGraph: {
-    title: 'NoteHub',
-    description:
-      'Save and edit notes in a convenient interface.',
-    url: `https://08-zustand-nine.vercel.app/`,
+    title: "NoteHub",
+    description: "Application for creating and viewing notes",
+    url: "https://08-zustand-nine.vercel.app/",
     images: [
       {
-        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'NoteHub',
+        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
       },
     ],
   },
@@ -41,15 +38,13 @@ export default function RootLayout({
   modal: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={roboto.variable}>
+    <html lang="en" className={roboto.variable}>
+      <body>
         <TanStackProvider>
           <Header />
-          <main>
-            {children}
-            {modal}
-          </main>
+          <main className="layout-main">{children}</main>
           <Footer />
+          {modal}
         </TanStackProvider>
       </body>
     </html>
