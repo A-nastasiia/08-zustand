@@ -1,33 +1,34 @@
-import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
-import "./globals.css";
-import Header from "@/components/Header/Header";
-import TanStackProvider from "../components/TanStackProvider/TanStackProvider";
-import Footer from "@/components/Footer/Footer";
-import React from "react";
+import type { Metadata } from 'next';
+import './globals.css';
+import Header from '@/components/Header/Header';
+import Footer from '@/components/Footer/Footer';
+import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
+import React from 'react';
+import { Roboto } from 'next/font/google';
 
 const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-roboto",
-  display: "swap",
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-roboto',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "NoteHub",
+  title: 'NoteHub',
   description:
-    "NoteHub is a simple and efficient application designed for managing personal notes",
+    'NoteHub is a simple tool for creating notes.',
   openGraph: {
-    title: "NoteHub",
+    title: 'NoteHub',
     description:
-      "NoteHub is a simple and efficient application designed for managing personal notes",
-    url: `https://notehub-public.goit.study/api`,
+      'Save and edit notes in a convenient interface.',
+    // url: 'https://08-zustand-pink.vercel.app/',
+    url: ``,
     images: [
       {
-        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
         width: 1200,
         height: 630,
-        alt: "NoteHub",
+        alt: 'NoteHub',
       },
     ],
   },
@@ -42,15 +43,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${roboto.variable}`}>
+      <body className={roboto.variable}>
         <TanStackProvider>
           <Header />
-
           <main>
             {children}
             {modal}
           </main>
-
           <Footer />
         </TanStackProvider>
       </body>

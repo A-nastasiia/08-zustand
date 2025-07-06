@@ -1,32 +1,49 @@
-"use client";
-import { useState } from "react";
-import Link from "next/link";
-import { TagWithAll } from "../../types/note";
-import css from "./TagsMenu.module.css";
+'use client';
 
-type Props = {
-  categories: TagWithAll[];
-};
+import css from './TagsMenu.module.css';
+import { useState } from 'react';
+import Link from 'next/link';
+import { TagsProps } from '@/types/note';
 
-const TagsMenu = ({ categories }: Props) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggle = () => setIsOpen(!isOpen);
+const TagsMenu = ({ tags }: TagsProps) => {
+  const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
+  const toggle = () => setIsOpenMenu(!isOpenMenu);
 
   return (
     <div className={css.menuContainer}>
-      <button onClick={toggle} className={css.menuButton}>
+      <button
+        onClick={toggle}
+        className={css.menuButton}
+        aria-label={isOpenMenu ? 'Close notes menu' : 'Open notes menu'}
+      >
         Notes ▾
       </button>
-      {isOpen && (
+      {isOpenMenu && (
         <ul className={css.menuList}>
-          {categories.map((tag) => (
-            <li key={tag} className={css.menuItem}>
+          <li className={css.menuItem}>
+            <Link
+              href={`/notes/filter/all`}
+              className={css.menuLink}
+              onClick={toggle}
+              aria-expanded={isOpenMenu}
+              aria-haspopup="true"
+              aria-label="View all notes"
+              role="menuitem"
+            >
+              All Notes
+            </Link>
+          </li>
+          {tags.map(tag => (
+            <li
+              key={tag}
+              className={css.menuItem}
+              aria-label={`View notes tagged with ${tag}`}
+              role="menuitem"
+            >
               <Link
-                href={
-                  tag === "All" ? `/notes/filter/all` : `/notes/filter/${tag}`
-                }
-                onClick={toggle}
+                href={`/notes/filter/${tag}`}
                 className={css.menuLink}
+                onClick={toggle}
               >
                 {tag}
               </Link>

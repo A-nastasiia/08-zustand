@@ -1,27 +1,22 @@
-// components/Header/Header.tsx
+import Link from 'next/link';
+import css from './Header.module.css';
+import TagsMenu from '../TagsMenu/TagsMenu';
 
-import css from "./Header.module.css";
-import Link from "next/link";
-import { fetchNotes } from "@/lib/api";
-import { Tag } from "@/types/note";
-import TagsMenu from "../TagsMenu/TagsMenu";
-
-const Header = async () => {
-  const { notes } = await fetchNotes({ page: 1 });
-  const tags: Tag[] = Array.from(new Set(notes.map((note) => note.tag)));
-
+const Header = () => {
   return (
     <header className={css.header}>
-      <Link href="/">NoteHub</Link>
+      <Link href="/" aria-label="Home">
+        NoteHub
+      </Link>
       <nav aria-label="Main Navigation">
         <ul className={css.navigation}>
           <li>
-            <TagsMenu categories={["All", ...tags]} />
+            <Link href="/">Home</Link>
           </li>
           <li>
-            <Link href="/" aria-label="Home">
-              Home
-            </Link>
+            <TagsMenu
+              tags={['Work', 'Personal', 'Meeting', 'Shopping', 'Todo']}
+            />
           </li>
         </ul>
       </nav>
