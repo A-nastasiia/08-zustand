@@ -8,7 +8,7 @@ import Loader from "../Loader/Loader";
 import ErrorText from "../ErrorMessage/ErrorMessage";
 
 interface NoteFormProps {
-    onClose: () => void;
+    onClose?: () => void;
 };
 interface FormValues {
     title: string;
@@ -32,7 +32,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
         mutationFn: (noteData: FormValues) => createNote(noteData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notes"] });
-            onClose();
+            onClose?.();
         }
     });
     const handleCreateTask = (values: FormValues) => {
