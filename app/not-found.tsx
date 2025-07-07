@@ -1,8 +1,8 @@
-
+import { Metadata } from 'next';
 import css from "./Home.module.css";
 import Link from "next/link";
 
-export const metadata = {
+export const metadata:Metadata = {
   title: "404 — Page Not Found | NoteHub",
   description:
     "Unfortunately, this page does not exist. Please return to the NoteHub.",
